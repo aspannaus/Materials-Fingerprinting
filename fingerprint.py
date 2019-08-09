@@ -26,13 +26,14 @@ def main():
     data.dgm_lists()
     distance = dist.distances(data, metric='dpc')
 
+    # for k in range(3):
+    #     distance.compute_bcc(data, k)
+    #     distance.compute_fcc(data, k)
+    # distance.feature_matrix()
+
     print("\n Multiprocessing Distances\n\n Training Set")
-    for k in range(3):
-        distance.compute_bcc(data, k)
-        distance.compute_fcc(data, k)
-    # distance.dists_mp(data)
+    distance.dists_mp(data)
     distance.feature_matrix()
-    np.save('repo_test.out', distance.X)
 
     utils.timestamp()
     return distance
