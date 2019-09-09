@@ -1,2 +1,2 @@
 # Materials-Fingerprinting
- Code to reproduce feature matrix in Materials Fingerprinting manuscript
+ Data files to reproduce feature matrix in Materials Fingerprinting manuscript
