@@ -1,0 +1,7 @@
+
+*.o
+*.so
+*.pyc
+data/.DS_Store
+.DS_Store
+c_dist.c
