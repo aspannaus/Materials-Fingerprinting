@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 
 import numpy as np
+import multiprocessing as mp
 from ripser import ripser
 from os.path import exists
+from multiprocessing.managers import BaseManager
 from functools import wraps
 import sys
 import gc
@@ -98,11 +100,11 @@ class getData():
 
     def read_data(self, in_file, dgms, multi=False):
         if not multi:
-            path = '/Users/Shared/ornldev/projects/GitHub/Materials-Fingerprinting/data/bcc_cells.xyz'
-            self.bcc_file = path  #+ in_file
+            path = '~/GitHub/fingerprint/data/synthetic_data/bcc_025_05.xyz'
+            self.bcc_file = path  # + in_file
             self.get_file(self.bcc_file)
-            path = '/Users/Shared/ornldev/projects/GitHub/Materials-Fingerprinting/data/fcc_cells.xyz'
-            self.fcc_file = path  #+ in_file
+            path = '~/GitHub/fingerprint/data/synthetic_data/fcc_025_05.xyz'
+            self.fcc_file = path  # + in_file
             self.get_file(self.fcc_file)
             with open(self.bcc_file) as f_in:
                 print(" Reading data from {:s}".format(self.bcc_file))
@@ -111,7 +113,7 @@ class getData():
                 print(" Reading data from {:s}".format(self.fcc_file))
                 dgms.fcc_cells = self.read_file(f_in, dgms.fcc_len)
         else:
-            path = '/Users/Shared/ornldev/projects/GitHub/Materials-Fingerprinting/data/multiphase/'
+            path = '~/GitHub/fingerprint/multiphase/'
             with open(path + in_file) as f_in:
                 print(" Reading data from {}".format(path + in_file))
                 dgms.cells = self.read_file(f_in, dgms.full_len)
@@ -135,7 +137,6 @@ class getData():
         a = f.readline().split()  # number of atoms in configuration
         atom_ct = int(a[0])
         nbrs = np.empty([atom_ct, 3])
-        # atom_pts = np.empty([n_config, atom_ct, 3])
         atom_pts = [None] * n_config
         tmp = np.empty(3)
         f.readline()

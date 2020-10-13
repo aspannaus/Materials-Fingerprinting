@@ -108,7 +108,7 @@ struct idx_t* initIdxs( double** restrict C, int ROWS, int COLS )
 }
 
 // For each row of the cost matrix, find the smallest element and subtract
-// it from every element in its row. Go to Step 2.
+// it from every element in its row.
 int step_one( struct idx_t* idxs ) {
         int r, c;
         double min_in_row;
@@ -124,7 +124,7 @@ int step_one( struct idx_t* idxs ) {
                         idxs->dm[r][c] -= min_in_row;
                 }
         }
-        return 2; // step two
+        return 2;
 }
 
 //Find a zero (Z) in the resulting matrix.  If there is no starred
@@ -155,8 +155,8 @@ int step_two( struct idx_t* idxs ){
 }
 
 //Cover each column containing a starred zero.  If all columns are covered,
-//these  describe a complete set of unique assignments. In such
-//case, we're DONE. Otherwise, go to Step 4.
+//these  describe a complete set of unique assignments, and we're done.
+// Otherwise, go to Step 4.
 int step_three( struct idx_t* idxs ){
         int r, c;
         int col_count = 0;
@@ -233,10 +233,10 @@ void find_star_in_row( struct idx_t* idxs ){
         }
 }
 //Find a noncovered zero and prime it.  If there is no starred zero
-//in the row containing it, go to 5.  Otherwise,
+//in the row containing it, go to step 5.  Otherwise,
 //cover this row and uncover the column containing the starred zero.
-//Continue until there are no uncovered zeros left.
-//Save the smallest uncovered value and go to Step 6.
+//Continue until there are no uncovered zeros.
+//Save the min uncovered value and go to Step 6.
 int step_four( struct idx_t* idxs ){
         int step = 1;
         bool done = false;
@@ -251,7 +251,6 @@ int step_four( struct idx_t* idxs ){
                 } else {
                         idxs->M[idxs->row][idxs->col] = 2;
                         if (star_in_row( idxs )) {
-                                // find_star_in_row( idxs );
                                 idxs->row_cover[idxs->row] = 1;
                                 idxs->col_cover[idxs->col] = 0;
                         } else {
@@ -403,7 +402,6 @@ double calc_cost( double **C, struct idx_t* idxs ){
 
         for (i = 0; i < idxs->ROWS; i++) {
                 for (j = 0; j < idxs->COLS; j++) {
-                        // M[i][j] = idxs->M[i][j];
                         if ( idxs->M[i][j] == 1 ) {
                                 cost += C[i][j];
                         }

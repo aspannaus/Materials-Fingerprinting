@@ -46,7 +46,6 @@ class readData():
         a = self.f.readline().split()  # number of atoms in configuration
         atom_ct = int(a[0])
         nbrs = np.empty([atom_ct, 3])
-        # atom_pts = np.empty([n_config, atom_ct, 3])
         atom_pts = [None] * n_config
         tmp = np.empty(3)
         self.f.readline()
@@ -82,7 +81,6 @@ def read_file(f_in, n_config):
     a = f_in.readline().split()  # number of atoms in configuration
     atom_ct = int(a[0])
     nbrs = np.empty([atom_ct, 3])
-    # atom_pts = np.empty([n_config, atom_ct, 3])
     atom_pts = [None] * n_config
     tmp = np.empty(3)
     f_in.readline()

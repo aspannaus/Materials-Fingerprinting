@@ -49,7 +49,6 @@ double dpc (const double** restrict d1, const double** restrict d2, double p, do
         for ( i = 1; i < ROWS; i++ )
                 dm[i] = dm[i-1] + COLS;
 
-        // #pragma omp parallel for collapse(2) private(j) schedule(static)
         for ( i = 0; i < ROWS; i++ ) {
                 for ( j = 0; j < COLS; j++ ) {
                         dm[i][j] = dist_fun(d1[i], d2[j], eps, p);

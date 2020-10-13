@@ -7,14 +7,15 @@ import dist
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import AdaBoostClassifier
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.model_selection import cross_val_score, cross_validate
+from sklearn.model_selection import cross_validate
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import zero_one_loss
 from joblib import dump
 import datetime
 
 
-def classify(train_data, test_data=None, split=0.25, plot=False, save_clf=False):
+def classify(train_data, test_data=None, cv=True, split=0.25,
+             plot=False, save_clf=False):
 
     if test_data is None:
         X_train, X_test, y_train, y_test = train_test_split(
@@ -51,21 +52,31 @@ def classify(train_data, test_data=None, split=0.25, plot=False, save_clf=False)
 
     y_pred = ada.predict(X_test)
     ada_score = ada.score(X_test, y_test)  # correct classification
-    X = np.concatenate((X_train, X_test), axis=0)
-    y = np.concatenate((y_train, y_test))
+
     print(' Boosting score = {:5.2f}%'.format(ada_score * 100))
+    print(" Ground Truth:")
+    print(' BCC count: {}'.format(np.count_nonzero(y_test == -1)))
+    print(' FCC count: {}'.format(np.count_nonzero(y_test == 1)))
+    print("\n Predictions:")
+    print(' BCC count: {}'.format(np.count_nonzero(y_pred == -1)))
+    print(' FCC count: {}'.format(np.count_nonzero(y_pred == 1)))
+    print(' Confusion Matrix: \n', confusion_matrix(y_test, y_pred))
 
-    scores = cross_validate(ada, X, y, cv=10,
-                            verbose=1, n_jobs=8,
-                            return_train_score=False)
+    if cv:
+        X = np.concatenate((X_train, X_test), axis=0)
+        y = np.concatenate((y_train, y_test))
 
-    cv_scores = scores['test_score'].mean()
-    print(" Mean CV score {}".format(cv_scores))
-    print(' Boosting Cross-Validation: ')
-    for s in scores:
-        res = ' ' + str(s) + ' = ' + str(scores[s])
-        print(res)
-    print(' Feature Importance: ', ada.feature_importances_)
+        scores = cross_validate(ada, X, y, cv=10,
+                                verbose=1, n_jobs=4,
+                                return_train_score=False)
+
+        cv_scores = scores['test_score'].mean()
+        print(" Mean CV score {}".format(cv_scores))
+        print(' Boosting Cross-Validation: ')
+        for s in scores:
+            res = ' ' + str(s) + ' = ' + str(scores[s])
+            print(res)
+        print(' Feature Importance: ', ada.feature_importances_)
 
     if plot:
         for i, y_pred in enumerate(ada.staged_predict(X_test)):
@@ -92,7 +103,6 @@ def classify(train_data, test_data=None, split=0.25, plot=False, save_clf=False)
         plt.tight_layout()
         plt.show()
 
-    print(' Confusion Matrix: \n', confusion_matrix(y_test, y_pred))
     return None
 
 
@@ -100,18 +110,15 @@ def classify(train_data, test_data=None, split=0.25, plot=False, save_clf=False)
 def main(prop=None):
     print("\n Process Started")
     clf_utils.timestamp()
-    multiphase = True
-    # scores = []
+    multiphase = False
 
-    # we will split the dataset in the classify function for now
     split = 0.25
     if prop is None:
-        num_b = 30
-        num_f = 30
+        num_b = 5000
+        num_f = 5000
     else:
         num_b = int(prop * 5000)
         num_f = int((1 - prop) * 5000)
-    # total = num_b + num_f
     train_name = 'cells_50K.xyz'
     print(" Train/test split = {:3.1f}%".format(split * 100))
     print(' Test size = {:4d}'.format(int((num_b + num_f) * split)))
@@ -120,14 +127,11 @@ def main(prop=None):
 
     if multiphase:
         test_name = 'multiphase_apt.xyz'
-        test_num = 10
+        test_num = 1000
         print(' Test size = {:4d}'.format(test_num))
         test_data = clf_utils.makeDiagrams(num_b, num_f, test_len=test_num)
         test_pts = clf_utils.getData()
 
-    # print('\n Test size split: {:2.1f} %'.format(100 *
-    #                                              float(test_b + test_f) /
-    #                                              float(num_b + num_f)))
     print(' Total PDs = {:4d}, BCC: {} FCC: {}'.format(num_b + num_f, num_b, num_f))
 
     print("\n Reading Training Data")
@@ -139,9 +143,9 @@ def main(prop=None):
 
     if multiphase:
         print("\n Reading Testing Data")
-        test_pts.read_data(test_name, test_data, multi=True)
+        test_pts.read_data(test_name, test_data, multi=multiphase)
         test_data.make_dgms()
-        test_dists = dist.distances(test_data, multi=True, metric='dpc')
+        test_dists = dist.distances(test_data, multi=multiphase, metric='dpc')
 
     print("\n Multiprocessing Distances\n\n Training Set")
     train_dists.dists_mp(data)
@@ -150,16 +154,11 @@ def main(prop=None):
     if multiphase:
         print("\n Computing Distances: Testing Set\n")
         test_dists.dists_mp_multiphase(test_data, data)
-        test_dists.feature_matrix(test_data, multiphase=True)
+        test_dists.feature_matrix(test_data, multiphase=multiphase)
 
     print(" Complete\n\n Classifying")
 
     classify(train_dists)
-
-    # avg = np.asarray(scores)
-    # print(scores, type(scores))
-    # print(' Mean CV accuracy = {:5.2f}%'.format(avg.mean() * 100))
-
     print("\n Process Concluded")
     clf_utils.timestamp()
 
@@ -167,7 +166,7 @@ def main(prop=None):
 
 
 if __name__ == "__main__":
-    main()
-    # vals = [0.1, 0.25, 0.4, 0.6, 0.75, 0.9]
-    # for v in vals:
-    #    main(v)
+    # main()
+    vals = [0.1, 0.25, 0.4, 0.6, 0.75, 0.9]
+    for v in vals:
+        main(v)

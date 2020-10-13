@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 
 import numpy as np
+import classify_utils
 import multiprocessing as mp
 from multiprocessing.managers import BaseManager
 import numpy.ctypeslib as npct
 from numpy.ctypeslib import ndpointer
 import ctypes as ct
 import os
-# from c_dist import wd
+from distances import dpc_cy
+from c_dist import wd
 import gc
 import time
 
@@ -41,8 +43,6 @@ class distances():
             self.mean_b = np.zeros((data.bcc_len, 6))
             self.tmp = np.zeros(data.bcc_len)
             self.tmp1 = np.zeros(data.fcc_len)
-            # self.m = np.zeros((data.bcc_len+data.fcc_len, 6))
-            # self.v = np.zeros((data.bcc_len+data.fcc_len, 6))
             self.X = np.zeros((data.bcc_len+data.fcc_len, 12))
             self.y = np.zeros(data.full_len)
             self.y[:data.bcc_len] = -1  # bcc
@@ -54,10 +54,8 @@ class distances():
             self.mean_b = np.zeros((data.full_len, 3))
             self.tmp = np.zeros(data.bcc_len)
             self.tmp1 = np.zeros(data.fcc_len)
-            # self.m = np.zeros((data.full_len, 6))
-            # self.v = np.zeros((data.full_len, 6))
             self.X = np.zeros((data.full_len, 12))
-            in_file = '/Users/Shared/ornldev/projects/GitHub/Materials-Fingerprinting/data/multiphase/multiphase_y.txt'
+            in_file = '~/GitHub/fingerprint/multiphase/multiphase_y.txt'
             self.y = np.loadtxt(in_file, np.float, max_rows=data.full_len)
 
     def dist(self, d1, d2, p, eps):
@@ -124,7 +122,7 @@ class distances():
             self.m = np.hstack((self.mean_b, self.mean_f))
             self.s = np.hstack((self.var_b, self.var_f))
             self.X = np.concatenate((self.m, self.s), axis=1)
-            print(X)
+            # print(self.X)
         else:
             self.m = np.vstack((self.mean_b, self.mean_f))
             self.s = np.vstack((self.var_b, self.var_f))
@@ -282,8 +280,8 @@ class distances():
             for j, dgm1 in enumerate(train.bcc_dgms):
                 self.tmp[j] = self.dist(dgm[dim], dgm1[dim],
                                         self.p, self.e[dim])
-            means[i, 0] = dim * 1  # np.mean(self.tmp)
-            var[i, 0] = (dim + 6) * 1  # np.var(self.tmp, ddof=1)
+            means[i, 0] = np.mean(self.tmp)
+            var[i, 0] = np.var(self.tmp, ddof=1)
             gc.collect()
         ret_dict[level] = [means, var]
         print(' BCC distances dim: {:d} MxB={}x{} completed in {:15.4f} seconds'.format(dim,len(data.dgms),len(train.bcc_dgms),time.time()-t))
@@ -295,8 +293,8 @@ class distances():
             for j, dgm1 in enumerate(train.fcc_dgms):
                 self.tmp1[j] = self.dist(dgm[dim], dgm1[dim],
                                          self.p, self.e[dim])
-            means[i, 0] = (dim + 3) * 1  # np.mean(self.tmp1)
-            var[i, 0] = (dim + 9) * 1  # np.var(self.tmp1, ddof=1)
+            means[i, 0] = np.mean(self.tmp1)
+            var[i, 0] = np.var(self.tmp1, ddof=1)
             gc.collect()
         ret_dict[level] = [means, var]
         print(' FCC distances dim: {:d} MxF={}x{} completed in {:15.4f} seconds'.format(dim,len(data.dgms),len(train.fcc_dgms),time.time()-t))
