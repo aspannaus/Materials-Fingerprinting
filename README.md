@@ -4,7 +4,7 @@
   - numpy, 
   - sklearn, 
   - matplotlib, and 
-  - [ripser] (https://ripser.scikit-tda.org/).
+  - [ripser](https://ripser.scikit-tda.org/).
 
  To make the c-version of the dpc distance, a makefile is provided. Ensure the correct compiler is
  specified, then simply type
