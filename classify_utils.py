@@ -1,10 +1,8 @@
 #!/usr/bin/env python3
 
 import numpy as np
-import multiprocessing as mp
 from ripser import ripser
 from os.path import exists
-from multiprocessing.managers import BaseManager
 from functools import wraps
 import sys
 import gc

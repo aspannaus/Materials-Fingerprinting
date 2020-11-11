@@ -488,7 +488,7 @@ int main(){
                 }
         }
 
-        start = cpu_time ( );
+        start = cpu_time ();
 
         c = assignment(C, dims, dims);
 

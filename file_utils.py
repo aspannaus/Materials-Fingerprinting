@@ -1,6 +1,7 @@
 import numpy as np
 
 
+
 class readData():
     def __init__(self, f_in):
         self.f = f_in

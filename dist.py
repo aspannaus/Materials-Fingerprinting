@@ -1,14 +1,12 @@
 #!/usr/bin/env python3
 
 import numpy as np
-import classify_utils
 import multiprocessing as mp
 from multiprocessing.managers import BaseManager
 import numpy.ctypeslib as npct
 from numpy.ctypeslib import ndpointer
 import ctypes as ct
 import os
-from distances import dpc_cy
 from c_dist import wd
 import gc
 import time

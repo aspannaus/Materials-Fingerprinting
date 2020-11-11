@@ -63,6 +63,7 @@ double dpc (const double** restrict d1, const double** restrict d2, double p, do
         } else if (p > 2) {
                 cost = pow (cost, 1.0 / p );
         }
+
         free(dm[0]);
         free(dm);
 

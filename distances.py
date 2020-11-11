@@ -1,7 +1,7 @@
 import numpy as np
 import ctypes as ct
 import numpy.ctypeslib as npct
-from math import pow, fabs
+from math import pow
 from numpy import power
 from numpy.linalg import norm
 from scipy.optimize import linear_sum_assignment
